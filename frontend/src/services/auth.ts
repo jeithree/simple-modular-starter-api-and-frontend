@@ -4,14 +4,14 @@ import type {UserResponse} from '@/types/user';
 import type {SessionResponse} from '@/types/session';
 
 export async function register(data: RegisterData) {
-	return apiFetch<{user: UserResponse}>('/api/v1/auth/register', {
+	return apiFetch<UserResponse>('/api/v1/auth/register', {
 		method: 'POST',
 		body: JSON.stringify(data),
 	});
 }
 
 export async function login(data: LoginData) {
-	return apiFetch<{user: UserResponse}>('/api/v1/auth/login', {
+	return apiFetch<UserResponse>('/api/v1/auth/login', {
 		method: 'POST',
 		body: JSON.stringify(data),
 	});

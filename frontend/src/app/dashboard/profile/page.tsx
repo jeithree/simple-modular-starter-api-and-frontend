@@ -19,7 +19,7 @@ export default function ProfilePage() {
 
 	const {data: profileData, mutate} = useSWR('/api/v1/users/me', async () => {
 		const response = await getProfile();
-		return response.data?.user;
+		return response.data;
 	});
 
 	const {

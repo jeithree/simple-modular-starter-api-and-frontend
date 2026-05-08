@@ -1,38 +1,34 @@
-import {describe, it, expect, afterAll} from 'vitest';
+import {describe, it, expect, beforeEach, afterEach} from 'vitest';
 import request from 'supertest';
 import app from '../../src/app/app.ts';
-import prisma from '../../src/prisma.ts';
+import {
+	clearRedisSessions,
+	clearUserTable,
+	createTestUser,
+	generateRandomTestUser,
+	loginWithAgent,
+} from './testHelpers.ts';
 
 describe('Authentication Integration Tests', () => {
-	const testUser = {
-		username: 'testuser',
-		email: 'test@email.com',
-		password: 'Password123!',
-	};
+	let agent: ReturnType<typeof request.agent>;
 
-	const testUser2 = {
-		username: 'anotheruser',
-		email: 'test2@email.com',
-		password: 'Password123!',
-	};
+	beforeEach(async () => {
+		agent = request.agent(app);
+	});
 
-	let sessionId = '';
-
-	afterAll(async () => {
-		try {
-			await prisma.user.delete({where: {email: testUser.email}});
-		} catch (error) {
-			console.log(error);
-		}
+	afterEach(async () => {
+		await clearRedisSessions();
+		await clearUserTable();
 	});
 
 	it('should fail if username is not allowed when registering', async () => {
-		const res = await request(app)
-			.post('/api/v1/auth/register')
-			.send({
-				...testUser,
-				username: 'administrator',
-			});
+		const user = generateRandomTestUser();
+
+		const res = await agent.post('/api/v1/auth/register').send({
+			username: 'administrator',
+			email: user.email,
+			password: user.password,
+		});
 
 		expect(res.statusCode).toEqual(409);
 		expect(res.body).toStrictEqual({
@@ -45,9 +41,11 @@ describe('Authentication Integration Tests', () => {
 	});
 
 	it('should fail if a field is missing when registering', async () => {
-		const res = await request(app).post('/api/v1/auth/register').send({
-			username: 'testuser',
-			password: 'Password123!',
+		const user = generateRandomTestUser();
+
+		const res = await agent.post('/api/v1/auth/register').send({
+			username: user.username,
+			password: user.password,
 		});
 
 		expect(res.statusCode).toEqual(400);
@@ -56,14 +54,15 @@ describe('Authentication Integration Tests', () => {
 	});
 
 	it('should register a new user', async () => {
-		const res = await request(app).post('/api/v1/auth/register').send(testUser);
+		const user = generateRandomTestUser();
+		const res = await agent.post('/api/v1/auth/register').send(user);
 
 		expect(res.statusCode).toEqual(201);
 		expect(res.body).toHaveProperty('message', 'User registered successfully');
 		expect(res.body.data.user).toStrictEqual({
 			id: expect.any(String),
-			username: testUser.username,
-			email: testUser.email,
+			username: user.username,
+			email: user.email,
 			name: null,
 			role: 'USER',
 			createdAt: expect.any(String),
@@ -71,7 +70,12 @@ describe('Authentication Integration Tests', () => {
 	});
 
 	it('should fail if username is already registered when registering', async () => {
-		const res = await request(app).post('/api/v1/auth/register').send(testUser);
+		const user = await createTestUser();
+		const newUser = generateRandomTestUser();
+
+		const res = await agent
+			.post('/api/v1/auth/register')
+			.send({...newUser, username: user.username});
 
 		expect(res.statusCode).toEqual(409);
 		expect(res.body).toStrictEqual({
@@ -81,9 +85,12 @@ describe('Authentication Integration Tests', () => {
 	});
 
 	it('should fail if email is already registered when registering', async () => {
-		const res = await request(app)
+		const user = await createTestUser();
+		const newUser = generateRandomTestUser();
+
+		const res = await agent
 			.post('/api/v1/auth/register')
-			.send({...testUser, username: 'testuser1'});
+			.send({...newUser, email: user.email});
 
 		expect(res.statusCode).toEqual(409);
 		expect(res.body).toStrictEqual({
@@ -93,8 +100,10 @@ describe('Authentication Integration Tests', () => {
 	});
 
 	it('should fail login when incorrect password is passed', async () => {
-		const res = await request(app).post('/api/v1/auth/login').send({
-			email: testUser.email,
+		const user = await createTestUser();
+
+		const res = await agent.post('/api/v1/auth/login').send({
+			email: user.email,
 			password: 'WrongPassword!',
 		});
 
@@ -106,29 +115,31 @@ describe('Authentication Integration Tests', () => {
 	});
 
 	it('should login successfully with correct credentials', async () => {
-		const res = await request(app).post('/api/v1/auth/login').send({
-			email: testUser.email,
-			password: testUser.password,
+		const user = await createTestUser();
+
+		const res = await agent.post('/api/v1/auth/login').send({
+			email: user.email,
+			password: user.password,
 		});
 
 		expect(res.statusCode).toEqual(200);
 		expect(res.body).toHaveProperty('message', 'Login successful');
-		expect(res.body.data.user).toStrictEqual({
+		expect(res.body.data).toStrictEqual({
 			id: expect.any(String),
-			username: testUser.username,
-			email: testUser.email,
+			username: user.username,
+			email: user.email,
 			name: null,
 			role: 'USER',
 		});
 		expect(res.headers['set-cookie']).toBeDefined();
-		sessionId = res.headers['set-cookie'][0].split(';')[0].split('=')[1];
 	});
 
-	it('should fail if registering a new user when there is an active session', async () => {
-		const res = await request(app)
-			.post('/api/v1/auth/register')
-			.set('Cookie', [`sid=${sessionId}`])
-			.send(testUser2);
+	it('should fail registering a new user when there is an active session', async () => {
+		const user = await createTestUser();
+		await loginWithAgent(agent, user.email, user.password);
+
+		const newUser = generateRandomTestUser();
+		const res = await agent.post('/api/v1/auth/register').send(newUser);
 
 		expect(res.statusCode).toEqual(401);
 		expect(res.body).toStrictEqual({
@@ -141,9 +152,10 @@ describe('Authentication Integration Tests', () => {
 	});
 
 	it('should get session info successfully if there is an active session', async () => {
-		const res = await request(app)
-			.get('/api/v1/auth/session')
-			.set('Cookie', [`sid=${sessionId}`]);
+		const user = await createTestUser();
+		await loginWithAgent(agent, user.email, user.password);
+
+		const res = await agent.get('/api/v1/auth/session');
 
 		expect(res.statusCode).toEqual(200);
 		expect(res.body).toHaveProperty('message', 'Session retrieved');
@@ -151,26 +163,32 @@ describe('Authentication Integration Tests', () => {
 			isAuthenticated: true,
 			user: {
 				id: expect.any(String),
-				username: testUser.username,
-				email: testUser.email,
+				username: user.username,
+				email: user.email,
 				role: 'USER',
 			},
 		});
 	});
 
 	it('should logout successfully if there is an active session', async () => {
-		const res = await request(app)
-			.post('/api/v1/auth/logout')
-			.set('Cookie', [`sid=${sessionId}`]);
+		const user = await createTestUser();
+		await loginWithAgent(agent, user.email, user.password);
+
+		const res = await agent.post('/api/v1/auth/logout');
 
 		expect(res.statusCode).toEqual(200);
 		expect(res.body).toHaveProperty('message', 'Logout successful');
+		expect(res.headers['set-cookie']).toBeDefined();
 	});
 
 	it('should have no active session after logout', async () => {
-		const res = await request(app)
-			.get('/api/v1/auth/session')
-			.set('Cookie', [`sid=${sessionId}`]);
+		const user = await createTestUser();
+		await loginWithAgent(agent, user.email, user.password);
+
+		const logoutRes = await agent.post('/api/v1/auth/logout');
+		expect(logoutRes.headers['set-cookie']).toBeDefined();
+
+		const res = await agent.get('/api/v1/auth/session');
 
 		expect(res.statusCode).toEqual(200);
 		expect(res.body).toHaveProperty('message', 'Session retrieved');

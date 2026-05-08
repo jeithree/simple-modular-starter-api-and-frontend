@@ -86,20 +86,14 @@ export const login = async (data: LoginDto) => {
 	});
 
 	if (!user) {
-		throw new BadRequestError(
-			'Invalid email or password',
-			'INVALID_CREDENTIALS',
-		);
+		throw new BadRequestError('Invalid email or password');
 	}
 
 	// Compare password
 	const isPasswordValid = await comparePassword(data.password, user.password);
 
 	if (!isPasswordValid) {
-		throw new BadRequestError(
-			'Invalid email or password',
-			'INVALID_CREDENTIALS',
-		);
+		throw new BadRequestError('Invalid email or password');
 	}
 
 	return {

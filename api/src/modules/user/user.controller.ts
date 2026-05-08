@@ -17,7 +17,7 @@ export const getMe = async (
 			throw new NotFoundError('User not found');
 		}
 
-		return res.status(200).json(successResponse('User retrieved', {user}));
+		return res.status(200).json(successResponse('User retrieved', user));
 	} catch (error) {
 		return next(error);
 	}
@@ -35,7 +35,7 @@ export const updateMe = async (
 		const user = await userService.updateUser(userId, data);
 		return res
 			.status(200)
-			.json(successResponse('Profile updated successfully', {user}));
+			.json(successResponse('Profile updated successfully', user));
 	} catch (error) {
 		return next(error);
 	}

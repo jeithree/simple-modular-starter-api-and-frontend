@@ -7,7 +7,8 @@
 	"scripts": {
 		"dev": "node --watch --env-file=.env.local src/app/server.ts",
 		"start": "node --env-file=.env src/app/server.ts",
-		"test": "vitest",
+		"test:db": "npx dotenv -e .env.test -- npx prisma migrate reset --force",
+		"test": "npm run test:db && vitest",
 		"type-check": "tsc"
 	},
 	"keywords": [],
@@ -36,6 +37,8 @@
 		"@types/luxon": "^3.7.1",
 		"@types/node": "^24.3.1",
 		"@types/supertest": "^6.0.3",
+		"dotenv": "^17.4.2",
+		"dotenv-cli": "^11.0.0",
 		"prisma": "^6.17.1",
 		"supertest": "^7.1.4",
 		"tsx": "^4.20.6",

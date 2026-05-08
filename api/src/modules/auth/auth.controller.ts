@@ -41,7 +41,7 @@ export const login = async (
 		req.session.createdAt = new Date().toISOString();
 		req.session.cookie.maxAge = SESSION_COOKIE.maxAge;
 
-		return res.status(200).json(successResponse('Login successful', {user}));
+		return res.status(200).json(successResponse('Login successful', user));
 	} catch (error) {
 		return next(error);
 	}
