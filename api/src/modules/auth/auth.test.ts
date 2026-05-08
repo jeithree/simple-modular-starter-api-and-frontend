@@ -1,6 +1,6 @@
 import {describe, it} from 'vitest';
 
-describe('auth', () => {
+describe('Auth', () => {
 	it.todo('register - should create a new user');
 	it.todo('register - should reject disallowed usernames');
 	it.todo('register - should reject duplicate username');
