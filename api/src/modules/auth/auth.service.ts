@@ -2,31 +2,7 @@ import type {RegisterDto, LoginDto} from './auth.types.ts';
 import prisma from '../../prisma.ts';
 import {hashPassword, comparePassword} from '../../helpers/password.ts';
 import {ConflictError, BadRequestError} from '../../lib/appError.ts';
-
-export const NOT_ALLOWED_USERNAMES = [
-	// Spanish
-	'admin',
-	'administrador',
-	'superusuario',
-	'root',
-	'administra',
-	'supervisor',
-	'gestor',
-	'administrativo',
-	'administración',
-	'sysadmin',
-	// English
-	'admin',
-	'administrator',
-	'superuser',
-	'root',
-	'manage',
-	'supervisor',
-	'systemadmin',
-	'manager',
-	'executive',
-	'control',
-];
+import {NOT_ALLOWED_USERNAMES} from '../../constants/usernames.ts';
 
 export const register = async (data: RegisterDto) => {
 	// Check for not allowed usernames
