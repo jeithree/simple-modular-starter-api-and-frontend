@@ -40,3 +40,39 @@ export const updateMe = async (
 		return next(error);
 	}
 };
+
+export const getSessions = async (
+	req: Request,
+	res: Response,
+	next: NextFunction,
+) => {
+	try {
+		const userId = req.session.userId as string;
+		const count = await userService.getUserSessionCount(userId);
+		return res
+			.status(200)
+			.json(successResponse('Sessions retrieved', {count}));
+	} catch (error) {
+		return next(error);
+	}
+};
+
+export const killAllSessions = async (
+	req: Request,
+	res: Response,
+	next: NextFunction,
+) => {
+	try {
+		const userId = req.session.userId as string;
+		await userService.killAllUserSessions(userId);
+		req.session.destroy((err) => {
+			if (err) return next(err);
+			res.clearCookie('sid');
+			return res
+				.status(200)
+				.json(successResponse('All sessions killed successfully'));
+		});
+	} catch (error) {
+		return next(error);
+	}
+};

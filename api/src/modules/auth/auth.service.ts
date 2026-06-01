@@ -72,6 +72,13 @@ export const login = async (data: LoginDto) => {
 		throw new BadRequestError('Invalid email or password');
 	}
 
+	if (!user.isActive) {
+		throw new BadRequestError(
+			'Tu cuenta ha sido desactivada. Contacta al administrador.',
+			'ACCOUNT_DISABLED',
+		);
+	}
+
 	return {
 		id: user.id,
 		username: user.username,

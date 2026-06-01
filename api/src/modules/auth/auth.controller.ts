@@ -73,7 +73,7 @@ export const getSession = async (
 	next: NextFunction,
 ) => {
 	try {
-		console.log('Session data:', req.session);
+		// console.log('Session data:', req.session);
 		return res.status(200).json(
 			successResponse('Session retrieved', {
 				isAuthenticated: !!req.session.userId,

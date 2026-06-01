@@ -1,17 +1,20 @@
 import {z} from 'zod';
 
-export const updateProfileSchema = z.object({
-	name: z.string().optional(),
-	avatar: z.url().optional(),
+export const updateUserSchema = z.object({
+	name: z
+		.string()
+		.max(100, 'Name must be at most 100 characters')
+		.optional(),
+	email: z.email('Invalid email address').optional(),
 	password: z
 		.string()
 		.refine(
 			(val) => !val || val.length >= 8,
-			'Password must be at least 8 characters long',
+			'Password must be at least 8 characters',
 		)
 		.refine(
 			(val) => !val || val.length <= 100,
-			'Password must be at most 100 characters long',
+			'Password must be at most 100 characters',
 		)
 		.refine(
 			(val) => !val || /[a-z]/.test(val),
@@ -31,5 +34,15 @@ export const updateProfileSchema = z.object({
 		)
 		.optional(),
 });
+export type UpdateUserInput = z.infer<typeof updateUserSchema>;
 
-export type UpdateProfileDto = z.infer<typeof updateProfileSchema>;
+export type AdminUser = {
+	id: string;
+	username: string;
+	email: string;
+	name?: string | null;
+	role: 'USER';
+	isActive: boolean;
+	createdAt: string;
+	updatedAt: string;
+};
