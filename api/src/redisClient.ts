@@ -5,7 +5,7 @@ import {
 	REDIS_PASSWORD,
 	REDIS_URL,
 } from './configs/basics.ts';
-import * as Logger from './helpers/logger.ts';
+import {logger} from './helpers/logger.ts';
 
 const USE_PASSWORD = IS_DEV_MODE || IS_TEST_MODE ? false : true;
 
@@ -14,11 +14,9 @@ const redisClient = createClient({
 	password: USE_PASSWORD ? REDIS_PASSWORD : undefined,
 });
 
-redisClient.on('error', (err) =>
-	Logger.log(`Redis Client Error: ${err}`, 'error'),
-);
-redisClient.on('connect', () => Logger.log('Redis: connecting...', 'info'));
-redisClient.on('ready', () => Logger.log('Redis: ready', 'info'));
+redisClient.on('error', (err) => logger.error({err}, 'Redis client error'));
+redisClient.on('connect', () => logger.info('Redis: connecting...'));
+redisClient.on('ready', () => logger.info('Redis: ready'));
 
 await redisClient.connect();
 export default redisClient;

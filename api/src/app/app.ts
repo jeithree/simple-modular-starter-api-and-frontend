@@ -1,4 +1,5 @@
 import express from 'express';
+import {pinoHttp} from 'pino-http';
 import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 import cors from 'cors';
@@ -13,6 +14,7 @@ import {
 } from '../configs/basics.ts';
 import {SESSION_COOKIE} from '../configs/cookies.ts';
 import {errorHandler} from '../middlewares/errorHandler.ts';
+import {logger} from '../helpers/logger.ts';
 import router from './routes.ts';
 
 const app = express();
@@ -22,6 +24,27 @@ app.set('trust proxy', 1);
 app.set('port', PORT);
 
 // Middlewares
+app.use(
+	pinoHttp({
+		logger,
+		serializers: {
+			req(req) {
+				return {
+					id: req.id,
+					method: req.method,
+					url: req.url,
+					ip: req.ip,
+				};
+			},
+
+			res(res) {
+				return {
+					statusCode: res.statusCode,
+				};
+			},
+		},
+	}),
+);
 app.use(helmet());
 app.use(
 	cors({

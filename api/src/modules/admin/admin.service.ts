@@ -8,7 +8,7 @@ import {
 	ADMIN_PASSWORD,
 	SESSION_REDIS_PREFIX,
 } from '../../configs/basics.ts';
-import * as Logger from '../../helpers/logger.ts';
+import {logger} from '../../helpers/logger.ts';
 import redisClient from '../../redisClient.ts';
 
 export const createInitialAdminUser = async () => {
@@ -30,7 +30,7 @@ export const createInitialAdminUser = async () => {
 			},
 		});
 	} catch (error) {
-		Logger.log(error, 'error');
+		logger.error({err: error}, 'Failed to create initial admin user');
 		throw error;
 	}
 };
@@ -107,10 +107,7 @@ const invalidateUserSessions = async (userId: string) => {
 			}
 		}
 	} catch (err) {
-		Logger.log(
-			`Error invalidating sessions for user ${userId}: ${err}`,
-			'error',
-		);
+		logger.error({err, userId}, `Error invalidating sessions for user`);
 	}
 };
 

@@ -1,27 +1,29 @@
-import {DateTime} from 'luxon';
-import {IS_DEV_MODE, TIME_ZONE} from '../configs/basics.ts';
+import pino, {type LoggerOptions} from 'pino';
+import {IS_DEV_MODE, IS_TEST_MODE} from '../configs/basics.ts';
 
-type LogType = 'error' | 'warn' | 'info' | 'debug';
+const level = IS_TEST_MODE ? 'silent' : IS_DEV_MODE ? 'debug' : 'info';
 
-export const log = async (
-	log: unknown,
-	type: LogType,
-	onlyIfDevMode: boolean = false
-) => {
-	if (onlyIfDevMode && !IS_DEV_MODE) return;
-
-	const timestamp = DateTime.now()
-		.setZone(TIME_ZONE)
-		.toFormat('yyyy-MM-dd HH:mm:ss');
-
-	const logContent = log instanceof Error ? log.stack : String(log);
-	const logMessage = `[${timestamp}] [${type.toUpperCase()}] ${logContent}`;
-
-	if (type === 'error') {
-		console.error(logMessage);
-	}
-
-	if (type === 'warn' || type === 'info' || type === 'debug') {
-		console.log(logMessage);
-	}
+const options: LoggerOptions = {
+	level,
+	redact: {
+		paths: [
+			'req.headers.cookie',
+			'req.headers.authorization',
+			'req.headers["x-api-key"]',
+		],
+		censor: '[Redacted]',
+	},
 };
+
+if (IS_DEV_MODE) {
+	options.transport = {
+		target: 'pino-pretty',
+		options: {
+			colorize: true,
+			translateTime: 'SYS:yyyy-mm-dd HH:MM:ss',
+			ignore: 'pid,hostname',
+		},
+	};
+}
+
+export const logger = pino(options);

@@ -1,7 +1,7 @@
 import type {Request, Response, NextFunction} from 'express';
 import {AppError} from '../lib/appError.ts';
 import {errorResponse} from '../lib/apiResponse.ts';
-import * as Logger from '../helpers/logger.ts';
+import {logger} from '../helpers/logger.ts';
 
 export const errorHandler = async (
 	err: Error | AppError,
@@ -16,7 +16,7 @@ export const errorHandler = async (
 	}
 
 	// Unknown error
-	Logger.log(`Unhandled error: ${err.stack || err.message}`, 'error');
+	logger.error(err, 'Unhandled error');
 	return res
 		.status(500)
 		.json(

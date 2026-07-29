@@ -1,19 +1,26 @@
 import app from './app.ts';
-import * as Logger from '../helpers/logger.ts';
+import {logger} from '../helpers/logger.ts';
 import {init} from './init.ts';
 
 await init();
+const PORT = app.get('port');
 
-app.listen(app.get('port'), () => {
-	Logger.log(`Server running on http://localhost:${app.get('port')}`, 'info');
+app.listen(PORT, () => {
+	logger.info(
+		{
+			port: PORT,
+			url: `http://localhost:${PORT}`,
+		},
+		'Server started',
+	);
 });
 
 const gracefulShutdown = async () => {
 	try {
-		console.log('Shutting down gracefully...');
+		logger.info('Shutting down gracefully...');
 		process.exit(0);
 	} catch (error) {
-		console.error('Error during shutdown:', error);
+		logger.error({err: error}, 'Error during shutdown');
 		process.exit(1);
 	}
 };
