@@ -3,6 +3,7 @@ import {hashPassword} from '../../helpers/password.ts';
 import redisClient from '../../redisClient.ts';
 import {SESSION_REDIS_PREFIX} from '../../configs/basics.ts';
 import {type UpdateProfileDto} from './user.types.ts';
+import {logger} from '../../helpers/logger.ts';
 
 export const getUserById = async (userId: string) => {
 	const user = await prisma.user.findUnique({
@@ -46,31 +47,51 @@ export const updateUser = async (userId: string, data: UpdateProfileDto) => {
 };
 
 export const getUserSessionCount = async (userId: string) => {
-	const keys = await redisClient.keys(`${SESSION_REDIS_PREFIX}*`);
-	let count = 0;
-	for (const key of keys) {
-		const raw = await redisClient.get(key);
-		if (!raw) continue;
-		try {
-			const parsed = JSON.parse(raw);
-			if (parsed.userId === userId) count++;
-		} catch {
-			// skip unparseable session
-		}
+	try {
+		const sessionIds = await redisClient.sMembers(`user_sessions:${userId}`);
+		return sessionIds.length;
+	} catch (err) {
+		logger.error(
+			{
+				err,
+				userId,
+			},
+			'Error getting user session count',
+		);
+
+		return 0;
 	}
-	return count;
 };
 
 export const killAllUserSessions = async (userId: string) => {
-	const keys = await redisClient.keys(`${SESSION_REDIS_PREFIX}*`);
-	for (const key of keys) {
-		const raw = await redisClient.get(key);
-		if (!raw) continue;
-		try {
-			const parsed = JSON.parse(raw);
-			if (parsed.userId === userId) await redisClient.del(key);
-		} catch {
-			// skip unparseable session
+	try {
+		const sessionIds = await redisClient.sMembers(`user_sessions:${userId}`);
+
+		if (sessionIds.length === 0) {
+			return;
 		}
+
+		const sessionKeys = sessionIds.map(
+			(sessionId) => `${SESSION_REDIS_PREFIX}${sessionId}`,
+		);
+
+		await redisClient.del(sessionKeys);
+		await redisClient.del(`user_sessions:${userId}`);
+
+		logger.info(
+			{
+				userId,
+				sessionsDeleted: sessionIds.length,
+			},
+			'All user sessions killed',
+		);
+	} catch (err) {
+		logger.error(
+			{
+				err,
+				userId,
+			},
+			'Error killing user sessions',
+		);
 	}
 };

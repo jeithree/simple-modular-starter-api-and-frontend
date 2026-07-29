@@ -93,21 +93,34 @@ export const updateUser = async (userId: string, data: UpdateUserDto) => {
 
 const invalidateUserSessions = async (userId: string) => {
 	try {
-		const keys = await redisClient.keys(`${SESSION_REDIS_PREFIX}*`);
-		for (const key of keys) {
-			const raw = await redisClient.get(key);
-			if (!raw) continue;
-			try {
-				const parsed = JSON.parse(raw);
-				if (parsed.userId === userId) {
-					await redisClient.del(key);
-				}
-			} catch {
-				// skip unparseable session
-			}
+		const sessionIds = await redisClient.sMembers(`user_sessions:${userId}`);
+
+		if (sessionIds.length === 0) {
+			return;
 		}
+
+		const sessionKeys = sessionIds.map(
+			(sessionId) => `${SESSION_REDIS_PREFIX}${sessionId}`,
+		);
+
+		await redisClient.del(sessionKeys);
+		await redisClient.del(`user_sessions:${userId}`);
+
+		logger.info(
+			{
+				userId,
+				sessionsDeleted: sessionIds.length,
+			},
+			'User sessions invalidated',
+		);
 	} catch (err) {
-		logger.error({err, userId}, `Error invalidating sessions for user`);
+		logger.error(
+			{
+				err,
+				userId,
+			},
+			'Error invalidating user sessions',
+		);
 	}
 };
 

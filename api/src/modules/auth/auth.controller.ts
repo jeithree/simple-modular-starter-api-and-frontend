@@ -2,7 +2,8 @@ import type {Request, Response, NextFunction} from 'express';
 import type {RegisterDto, LoginDto} from './auth.types.ts';
 import * as authService from './auth.service.ts';
 import {successResponse} from '../../lib/apiResponse.ts';
-import * as Logger from '../../helpers/logger.ts';
+import {logger} from '../../helpers/logger.ts';
+import redisClient from '../../redisClient.ts';
 import {SESSION_COOKIE} from '../../configs/cookies.ts';
 
 export const register = async (
@@ -41,6 +42,17 @@ export const login = async (
 		req.session.createdAt = new Date().toISOString();
 		req.session.cookie.maxAge = SESSION_COOKIE.maxAge;
 
+        // Make sure the session is saved
+		await new Promise<void>((resolve, reject) => {
+			req.session.save((err) => {
+				if (err) reject(err);
+				else resolve();
+			});
+		});
+
+        // Keep own track of sessions, to invalidate later
+		await redisClient.sAdd(`user_sessions:${user.id}`, req.session.id);
+
 		return res.status(200).json(successResponse('Login successful', user));
 	} catch (error) {
 		return next(error);
@@ -55,7 +67,7 @@ export const logout = async (
 	try {
 		req.session.destroy((err) => {
 			if (err) {
-				Logger.log(`Error destroying session in logout: ${err}`, 'error');
+				logger.error({err}, 'Error destroying session in logout');
 			}
 		});
 
