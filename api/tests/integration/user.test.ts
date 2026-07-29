@@ -20,7 +20,7 @@ describe('User Integration Tests', () => {
 		await clearUserTable();
 	});
 
-	it('should get user Data by ID', async () => {
+	it('should get current user profile', async () => {
 		const user = await createTestUser();
 		await loginWithAgent(agent, user.email, user.password);
 
@@ -44,7 +44,7 @@ describe('User Integration Tests', () => {
 		const user = await createTestUser();
 		await loginWithAgent(agent, user.email, user.password);
 
-		const res = await agent.patch('/api/v1/users/me').send({
+		const res = await agent.patch('/api/v1/users').send({
 			name: 'Updated Name',
 			avatar: 'https://example.com/avatar.png',
 		});

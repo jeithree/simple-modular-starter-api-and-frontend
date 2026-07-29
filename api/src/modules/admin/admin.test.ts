@@ -17,7 +17,12 @@ vi.mock('../../helpers/password.ts', () => ({
 }));
 
 vi.mock('../../helpers/logger.ts', () => ({
-	log: vi.fn(),
+	logger: {
+		info: vi.fn(),
+		warn: vi.fn(),
+		error: vi.fn(),
+		debug: vi.fn(),
+	},
 }));
 
 const mockFindFirst = vi.mocked(prisma.user.findFirst);
