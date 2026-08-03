@@ -57,6 +57,12 @@ npx prisma migrate dev
 npm run dev
 ```
 
+6. Api documentation (Swagger UI) only in test and development mode, is available at:
+
+```bash
+http://localhost:5000/docs/
+```
+
 ## API Endpoints
 
 ### Auth

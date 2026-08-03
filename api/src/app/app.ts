@@ -4,6 +4,7 @@ import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 import cors from 'cors';
 import session from 'express-session';
+import swaggerUi from 'swagger-ui-express';
 import {RedisStore} from 'connect-redis';
 import redisClient from '../redisClient.ts';
 import {
@@ -11,13 +12,17 @@ import {
 	API_URL,
 	SESSION_SECRET,
 	SESSION_REDIS_PREFIX,
+	IS_DEV_MODE,
+	IS_TEST_MODE,
 } from '../configs/basics.ts';
 import {SESSION_COOKIE} from '../configs/cookies.ts';
 import {errorHandler} from '../middlewares/errorHandler.ts';
 import {logger} from '../helpers/logger.ts';
 import router from './routes.ts';
+import {buildOpenApiDocument} from '../openapi/index.ts';
 
 const app = express();
+const openApiDocument = buildOpenApiDocument();
 
 // Settings
 app.set('trust proxy', 1);
@@ -68,6 +73,22 @@ app.use(
 		}),
 	}),
 );
+
+const ENABLE_DOCS = IS_DEV_MODE || IS_TEST_MODE;
+
+if (ENABLE_DOCS) {
+	app.get('/docs/openapi.json', (_req, res) => {
+		res.json(openApiDocument);
+	});
+
+	app.use(
+		'/docs',
+		swaggerUi.serve,
+		swaggerUi.setup(openApiDocument, {
+			customSiteTitle: 'API Documentation',
+		}),
+	);
+}
 
 // Routes
 app.use('/api/v1', router);
