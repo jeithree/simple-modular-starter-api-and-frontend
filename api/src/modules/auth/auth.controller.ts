@@ -73,7 +73,7 @@ export const logout = async (
 
 		res.clearCookie(SESSION_COOKIE.name, SESSION_COOKIE.options);
 
-		return res.status(200).json(successResponse('Logout successful'));
+		return res.status(200).json(successResponse('Logout successful', null));
 	} catch (error) {
 		return next(error);
 	}

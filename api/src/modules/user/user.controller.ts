@@ -70,7 +70,7 @@ export const killAllSessions = async (
 			res.clearCookie('sid');
 			return res
 				.status(200)
-				.json(successResponse('All sessions killed successfully'));
+				.json(successResponse('All sessions killed successfully', null));
 		});
 	} catch (error) {
 		return next(error);
