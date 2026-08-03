@@ -12,8 +12,11 @@ A minimalist Express + Prisma API starter with essential features only.
 - ✅ Password hashing with bcrypt
 - ✅ Input validation with Zod
 - ✅ Basic security (Helmet, CORS)
+- ✅ Rate limiting on auth endpoints
 - ✅ Error handling middleware
-- ✅ File logging system
+- ✅ Structured logging with Pino
+- ✅ OpenAPI/Swagger documentation (dev & test only)
+- ✅ Admin module (user search, update, deactivate/reactivate)
 
 ## Setup
 
@@ -75,22 +78,37 @@ http://localhost:5000/docs/
 ### Users
 
 - `GET /api/v1/users/me` - Get current user profile
-- `PATCH /api/v1/users/me` - Update current user profile
+- `PATCH /api/v1/users/` - Update current user profile
+- `GET /api/v1/users/sessions` - List all active sessions
+- `DELETE /api/v1/users/sessions` - Terminate all other sessions
+
+### Admin
+
+- `GET /api/v1/admin/users` - Search users
+- `PATCH /api/v1/admin/users/:id` - Update a user
+- `PATCH /api/v1/admin/users/:id/deactivate` - Deactivate a user
+- `PATCH /api/v1/admin/users/:id/reactivate` - Reactivate a user
 
 ## Project Structure
 
 ```
 src/
-├── app.ts              # Express app setup
-├── server.ts           # Server entry point
+├── app/
+│   ├── app.ts          # Express app setup
+│   ├── init.ts         # App initialization
+│   ├── routes.ts       # Top-level route registration
+│   └── server.ts       # Server entry point
+├── configs/            # Environment config (basics, cookies)
+├── constants/          # Shared constants
+├── helpers/            # Logger, password utilities
+├── lib/                # AppError, apiResponse, memoryCache
+├── middlewares/        # Auth, errorHandler, rateLimit, validation
+├── modules/
+│   ├── auth/           # Register, login, logout, session
+│   ├── user/           # Profile, sessions
+│   └── admin/          # User management
+├── openapi/            # OpenAPI schema registry and document builder
+├── types/              # TypeScript types
 ├── prisma.ts           # Prisma client
-├── redisClient.ts      # Redis client
-├── config.ts           # Configuration
-├── controllers/        # Route controllers
-├── services/          # Business logic
-├── middlewares/       # Express middlewares (auth, validation, error handling)
-├── routes/            # Route definitions
-├── types/             # TypeScript types
-├── helpers/           # Helper functions (logger, password, response)
-└── lib/               # Libraries (appError)
+└── redisClient.ts      # Redis client
 ```
