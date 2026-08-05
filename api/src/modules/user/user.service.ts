@@ -1,7 +1,10 @@
 import prisma from '../../prisma.ts';
 import {hashPassword} from '../../helpers/password.ts';
 import redisClient from '../../redisClient.ts';
-import {SESSION_REDIS_PREFIX} from '../../configs/basics.ts';
+import {
+	SESSION_KEY_PREFIX,
+	USER_SESSION_SET_PREFIX,
+} from '../../configs/basics.ts';
 import {type UpdateProfileDto} from './user.types.ts';
 import {logger} from '../../helpers/logger.ts';
 
@@ -48,12 +51,14 @@ export const updateUser = async (userId: string, data: UpdateProfileDto) => {
 
 export const getUserSessionCount = async (userId: string) => {
 	try {
-		const sessionIds = await redisClient.sMembers(`user_sessions:${userId}`);
+		const sessionIds = await redisClient.sMembers(
+			`${USER_SESSION_SET_PREFIX}${userId}`,
+		);
 		return sessionIds.length;
-	} catch (err) {
+	} catch (error) {
 		logger.error(
 			{
-				err,
+				error,
 				userId,
 			},
 			'Error getting user session count',
@@ -65,18 +70,20 @@ export const getUserSessionCount = async (userId: string) => {
 
 export const killAllUserSessions = async (userId: string) => {
 	try {
-		const sessionIds = await redisClient.sMembers(`user_sessions:${userId}`);
+		const sessionIds = await redisClient.sMembers(
+			`${USER_SESSION_SET_PREFIX}${userId}`,
+		);
 
 		if (sessionIds.length === 0) {
 			return;
 		}
 
 		const sessionKeys = sessionIds.map(
-			(sessionId) => `${SESSION_REDIS_PREFIX}${sessionId}`,
+			(sessionId) => `${SESSION_KEY_PREFIX}${sessionId}`,
 		);
 
 		await redisClient.del(sessionKeys);
-		await redisClient.del(`user_sessions:${userId}`);
+		await redisClient.del(`${USER_SESSION_SET_PREFIX}${userId}`);
 
 		logger.info(
 			{
@@ -85,10 +92,10 @@ export const killAllUserSessions = async (userId: string) => {
 			},
 			'All user sessions killed',
 		);
-	} catch (err) {
+	} catch (error) {
 		logger.error(
 			{
-				err,
+				error,
 				userId,
 			},
 			'Error killing user sessions',

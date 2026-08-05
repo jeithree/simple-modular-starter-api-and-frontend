@@ -1,7 +1,7 @@
 import request from 'supertest';
 import prisma from '../../src/prisma.ts';
 import {hashPassword} from '../../src/helpers/password.ts';
-import {SESSION_REDIS_PREFIX} from '../../src/configs/basics.ts';
+import {SESSION_KEY_PREFIX} from '../../src/configs/basics.ts';
 import redisClient from '../../src/redisClient.ts';
 
 export const generateRandomTestUser = () => {
@@ -58,7 +58,7 @@ export const loginWithAgent = async (
 };
 
 export const clearRedisSessions = async () => {
-	const keys = await redisClient.keys(`${SESSION_REDIS_PREFIX}*`);
+	const keys = await redisClient.keys(`${SESSION_KEY_PREFIX}*`);
 	if (keys.length > 0) {
 		await redisClient.del(keys);
 	}

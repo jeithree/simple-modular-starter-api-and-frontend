@@ -40,14 +40,18 @@ export const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 if (!process.env.SESSION_SECRET) {
 	throw new Error('SESSION_SECRET is not defined in environment variables');
 }
-if (!process.env.SESSION_REDIS_PREFIX) {
+if (!process.env.SESSION_KEY_PREFIX) {
+	throw new Error('SESSION_KEY_PREFIX is not defined in environment variables');
+}
+if (!process.env.USER_SESSION_SET_PREFIX) {
 	throw new Error(
-		'SESSION_REDIS_PREFIX is not defined in environment variables',
+		'USER_SESSION_SET_PREFIX is not defined in environment variables',
 	);
 }
 
 export const SESSION_SECRET = process.env.SESSION_SECRET;
-export const SESSION_REDIS_PREFIX = process.env.SESSION_REDIS_PREFIX;
+export const SESSION_KEY_PREFIX = process.env.SESSION_KEY_PREFIX;
+export const USER_SESSION_SET_PREFIX = process.env.USER_SESSION_SET_PREFIX;
 
 if (!process.env.REDIS_HOST) {
 	throw new Error('REDIS_HOST is not defined in environment variables');

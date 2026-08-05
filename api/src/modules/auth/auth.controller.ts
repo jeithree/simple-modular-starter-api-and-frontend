@@ -5,6 +5,7 @@ import {successResponse} from '../../lib/apiResponse.ts';
 import {logger} from '../../helpers/logger.ts';
 import redisClient from '../../redisClient.ts';
 import {SESSION_COOKIE} from '../../configs/cookies.ts';
+import {USER_SESSION_SET_PREFIX} from '../../configs/basics.ts';
 
 export const register = async (
 	req: Request,
@@ -42,7 +43,7 @@ export const login = async (
 		req.session.createdAt = new Date().toISOString();
 		req.session.cookie.maxAge = SESSION_COOKIE.maxAge;
 
-        // Make sure the session is saved
+		// Make sure the session is saved
 		await new Promise<void>((resolve, reject) => {
 			req.session.save((err) => {
 				if (err) reject(err);
@@ -50,8 +51,11 @@ export const login = async (
 			});
 		});
 
-        // Keep own track of sessions, to invalidate later
-		await redisClient.sAdd(`user_sessions:${user.id}`, req.session.id);
+		// Keep own track of sessions, to invalidate later
+		await redisClient.sAdd(
+			`${USER_SESSION_SET_PREFIX}${user.id}`,
+			req.session.id,
+		);
 
 		return res.status(200).json(successResponse('Login successful', user));
 	} catch (error) {
@@ -67,7 +71,7 @@ export const logout = async (
 	try {
 		req.session.destroy((err) => {
 			if (err) {
-				logger.error({err}, 'Error destroying session in logout');
+				logger.error({err, method: 'logout'}, 'Error destroying session');
 			}
 		});
 

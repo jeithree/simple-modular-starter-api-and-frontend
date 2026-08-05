@@ -11,7 +11,7 @@ import {
 	PORT,
 	API_URL,
 	SESSION_SECRET,
-	SESSION_REDIS_PREFIX,
+	SESSION_KEY_PREFIX,
 	IS_DEV_MODE,
 	IS_TEST_MODE,
 } from '../configs/basics.ts';
@@ -69,7 +69,7 @@ app.use(
 		cookie: SESSION_COOKIE.options,
 		store: new RedisStore({
 			client: redisClient,
-			prefix: SESSION_REDIS_PREFIX,
+			prefix: SESSION_KEY_PREFIX,
 		}),
 	}),
 );

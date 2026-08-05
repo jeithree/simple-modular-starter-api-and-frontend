@@ -3,6 +3,8 @@ import type {UpdateProfileDto} from './user.types.ts';
 import * as userService from './user.service.ts';
 import {successResponse} from '../../lib/apiResponse.ts';
 import {NotFoundError} from '../../lib/appError.ts';
+import {SESSION_COOKIE} from '../../configs/cookies.ts';
+import {logger} from '../../helpers/logger.ts';
 
 export const getMe = async (
 	req: Request,
@@ -49,9 +51,7 @@ export const getSessions = async (
 	try {
 		const userId = req.session.userId as string;
 		const count = await userService.getUserSessionCount(userId);
-		return res
-			.status(200)
-			.json(successResponse('Sessions retrieved', {count}));
+		return res.status(200).json(successResponse('Sessions retrieved', {count}));
 	} catch (error) {
 		return next(error);
 	}
@@ -65,13 +65,20 @@ export const killAllSessions = async (
 	try {
 		const userId = req.session.userId as string;
 		await userService.killAllUserSessions(userId);
+
 		req.session.destroy((err) => {
-			if (err) return next(err);
-			res.clearCookie('sid');
-			return res
-				.status(200)
-				.json(successResponse('All sessions killed successfully', null));
+			if (err) {
+				logger.error(
+					{err, method: 'killAllSessions'},
+					'Error destroying session',
+				);
+			}
 		});
+
+		res.clearCookie(SESSION_COOKIE.name, SESSION_COOKIE.options);
+		return res
+			.status(200)
+			.json(successResponse('All sessions killed successfully', null));
 	} catch (error) {
 		return next(error);
 	}

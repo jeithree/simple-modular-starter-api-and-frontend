@@ -6,7 +6,8 @@ import {
 	ADMIN_USERNAME,
 	ADMIN_EMAIL,
 	ADMIN_PASSWORD,
-	SESSION_REDIS_PREFIX,
+	SESSION_KEY_PREFIX,
+	USER_SESSION_SET_PREFIX,
 } from '../../configs/basics.ts';
 import {logger} from '../../helpers/logger.ts';
 import redisClient from '../../redisClient.ts';
@@ -93,18 +94,20 @@ export const updateUser = async (userId: string, data: UpdateUserDto) => {
 
 const invalidateUserSessions = async (userId: string) => {
 	try {
-		const sessionIds = await redisClient.sMembers(`user_sessions:${userId}`);
+		const sessionIds = await redisClient.sMembers(
+			`${USER_SESSION_SET_PREFIX}${userId}`,
+		);
 
 		if (sessionIds.length === 0) {
 			return;
 		}
 
 		const sessionKeys = sessionIds.map(
-			(sessionId) => `${SESSION_REDIS_PREFIX}${sessionId}`,
+			(sessionId) => `${SESSION_KEY_PREFIX}${sessionId}`,
 		);
 
 		await redisClient.del(sessionKeys);
-		await redisClient.del(`user_sessions:${userId}`);
+		await redisClient.del(`${USER_SESSION_SET_PREFIX}${userId}`);
 
 		logger.info(
 			{
@@ -113,10 +116,10 @@ const invalidateUserSessions = async (userId: string) => {
 			},
 			'User sessions invalidated',
 		);
-	} catch (err) {
+	} catch (error) {
 		logger.error(
 			{
-				err,
+				error,
 				userId,
 			},
 			'Error invalidating user sessions',
@@ -143,7 +146,7 @@ export const reactivateUser = async (userId: string) => {
 	const user = await prisma.user.findUnique({where: {id: userId}});
 	if (!user) throw new NotFoundError('User not found');
 
-	const updated = prisma.user.update({
+	const updated = await prisma.user.update({
 		where: {id: userId},
 		data: {isActive: true},
 		select: USER_SELECT,
