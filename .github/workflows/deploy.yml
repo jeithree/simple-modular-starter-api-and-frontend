@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
 
     services:
-      mysql:
+      mariadb:
         image: mariadb:11.7.2
         env:
           MARIADB_ROOT_PASSWORD: test_password
@@ -46,6 +46,10 @@ jobs:
       - name: Install API dependencies
         working-directory: api
         run: npm ci
+
+      - name: Run API tests
+        working-directory: api
+        run: npm test
 
       - name: Show installed packages
         working-directory: api
