@@ -23,6 +23,9 @@ jobs:
       - name: Show Node version
         run: node --version
 
+      - name: Show NPM version
+        run: npm --version
+
       - name: Show repository files
         run: ls -la
 
