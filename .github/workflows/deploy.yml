@@ -18,7 +18,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-            node-version: 24.11.1
+          node-version: 24.11.1
 
       - name: Show Node version
         run: node --version
@@ -44,3 +44,7 @@ jobs:
       - name: Show installed packages
         working-directory: frontend
         run: npm list --depth=0
+
+      - name: Build frontend
+        working-directory: frontend
+        run: npm run build
