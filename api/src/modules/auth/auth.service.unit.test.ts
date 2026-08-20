@@ -1,3 +1,5 @@
-import {describe} from 'vitest';
+import {describe, it} from 'vitest';
 
-describe('Auth', () => {});
+describe('Auth', () => {
+    it.todo('implement tests');
+});
