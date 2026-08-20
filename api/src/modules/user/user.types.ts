@@ -2,7 +2,7 @@ import {z} from 'zod';
 
 export const updateProfileSchema = z.object({
 	name: z.string().optional(),
-	avatar: z.url().optional(),
+	avatar: z.url().optional().or(z.literal('')),
 	password: z
 		.string()
 		.refine(
