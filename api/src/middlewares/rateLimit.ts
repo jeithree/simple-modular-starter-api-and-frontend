@@ -1,6 +1,7 @@
 import type {Request, Response, NextFunction} from 'express';
 import rateLimit from 'express-rate-limit';
 import {RateLimitError} from '../lib/appError.ts';
+import {IS_TEST_MODE} from '../configs/basics.ts';
 
 export const registerLimiter = rateLimit({
 	windowMs: 60 * 60 * 1000,
@@ -27,7 +28,7 @@ export const registerLimiter = rateLimit({
 
 export const loginLimiter = rateLimit({
 	windowMs: 15 * 60 * 1000,
-	max: 10,
+	max: IS_TEST_MODE ? 1000 : 10,
 	handler: (req: Request, _res: Response, next: NextFunction) => {
 		req.log.warn(
 			{
