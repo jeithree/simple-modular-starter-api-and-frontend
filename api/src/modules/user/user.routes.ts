@@ -8,12 +8,12 @@ const router = Router();
 
 router.get('/me', isAuthenticated, userController.getMe);
 router.patch(
-	'/',
+	'/me',
 	isAuthenticated,
 	validateBody(updateProfileSchema),
 	userController.updateMe,
 );
-router.get('/sessions', isAuthenticated, userController.getSessions);
-router.delete('/sessions', isAuthenticated, userController.killAllSessions);
+router.get('/me/sessions', isAuthenticated, userController.getSessions);
+router.delete('/me/sessions', isAuthenticated, userController.killAllSessions);
 
 export default router;

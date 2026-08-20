@@ -48,7 +48,7 @@ export const registerUserOpenApi = () => {
 
 	registry.registerPath({
 		method: 'patch',
-		path: '/api/v1/users',
+		path: '/api/v1/users/me',
 		summary: 'Update the current user profile',
 		tags: ['Users'],
 		request: {
@@ -74,7 +74,7 @@ export const registerUserOpenApi = () => {
 
 	registry.registerPath({
 		method: 'get',
-		path: '/api/v1/users/sessions',
+		path: '/api/v1/users/me/sessions',
 		summary: 'Count active sessions for the current user',
 		tags: ['Users'],
 		responses: {
@@ -91,7 +91,7 @@ export const registerUserOpenApi = () => {
 
 	registry.registerPath({
 		method: 'delete',
-		path: '/api/v1/users/sessions',
+		path: '/api/v1/users/me/sessions',
 		summary: 'Kill all sessions for the current user',
 		tags: ['Users'],
 		responses: {
