@@ -36,7 +36,6 @@ prisma/dev.db
 # Misc
 .cache/
 .pnp/
-package-lock.json
 pnpm-lock.yaml
 
 # Uploaded files
