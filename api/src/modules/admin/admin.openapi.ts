@@ -19,7 +19,7 @@ export const registerAdminOpenApi = () => {
 
 	const UpdateUserResponseSchema = registry.register(
 		'UpdateUserResponse',
-		createSuccessResponseSchema(UserSchema)
+		createSuccessResponseSchema(UserSchema),
 	);
 
 	const userIdParam = z.object({id: z.string()});

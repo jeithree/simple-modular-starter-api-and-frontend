@@ -74,8 +74,9 @@ export const updateUser = async (userId: string, data: UpdateUserDto) => {
 		const existing = await prisma.user.findUnique({
 			where: {email: data.email.toLowerCase()},
 		});
-		if (existing)
+		if (existing) {
 			throw new ConflictError('Email is already in use', 'EMAIL_TAKEN');
+		}
 	}
 
 	const updateData: Record<string, unknown> = {};
@@ -92,7 +93,7 @@ export const updateUser = async (userId: string, data: UpdateUserDto) => {
 	return updated;
 };
 
-const invalidateUserSessions = async (userId: string) => {
+export const invalidateUserSessions = async (userId: string) => {
 	try {
 		const sessionIds = await redisClient.sMembers(
 			`${USER_SESSION_SET_PREFIX}${userId}`,
