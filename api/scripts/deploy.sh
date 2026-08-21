@@ -18,8 +18,11 @@ pm2 reload ecosystem.config.cjs --update-env
 echo "Checking API health..."
 
 curl --fail --silent --show-error \
-  --retry 10 \
+  --connect-timeout 2 \
+  --max-time 5 \
+  --retry 30 \
   --retry-delay 2 \
+  --retry-connrefused \
   http://127.0.0.1:5000/health
 
 echo "API health check passed."
