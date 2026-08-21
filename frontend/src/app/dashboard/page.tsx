@@ -33,7 +33,7 @@ export default function DashboardPage() {
 
 	return (
 		<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-			<h1 className="text-3xl font-bold mb-4">Welcome to your Dashboard</h1>
+			<h1 className="text-3xl font-bold mb-4">Welcome to your Dashboard changed</h1>
 			<p className="text-muted-foreground mb-8">
 				You&apos;re logged in as {session?.user?.username}
 			</p>
