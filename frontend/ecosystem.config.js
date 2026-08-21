@@ -3,7 +3,7 @@ export default {
 	apps: [
 		{
 			name: 'frontend',
-			cwd: '/home/user-frontend/htdocs/app.jeitdev.com',
+			cwd: '/home/user-frontend/htdocs/app.jeitdev.com/frontend',
 			script: 'npm',
 			args: 'start',
 			env: {
