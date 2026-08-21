@@ -1,4 +1,4 @@
-name: Test
+name: CI/CD
 
 on:
   push:
@@ -34,15 +34,6 @@ jobs:
         with:
           node-version: 24.11.1
 
-      - name: Show Node version
-        run: node --version
-
-      - name: Show NPM version
-        run: npm --version
-
-      - name: Show repository files
-        run: ls -la
-
       - name: Install API dependencies
         working-directory: api
         run: npm ci
@@ -51,20 +42,34 @@ jobs:
         working-directory: api
         run: npm test
 
-      - name: Show installed packages
-        working-directory: api
-        run: npm list --depth=0
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.11.1
 
       - name: Install Frontend dependencies
         working-directory: frontend
         run: npm ci
 
-      - name: Show installed packages
-        working-directory: frontend
-        run: npm list --depth=0
-
       - name: Build frontend
         working-directory: frontend
         run: npm run build
         env:
-            NEXT_PUBLIC_API_URL: http://localhost:5000
+          NEXT_PUBLIC_API_URL: http://localhost:5000
+
+  deploy:
+    needs:
+      - test
+      - build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy
+        run: echo "Deploying..."
