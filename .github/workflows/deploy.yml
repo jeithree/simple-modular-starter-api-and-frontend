@@ -6,6 +6,10 @@ on:
       - main
 
   workflow_dispatch:
+    inputs:
+      commit:
+        description: "Commit to deploy"
+        required: true
 
 jobs:
   test:
@@ -68,6 +72,7 @@ jobs:
     needs:
       - test
       - build
+    
     runs-on: ubuntu-latest
 
     steps:
