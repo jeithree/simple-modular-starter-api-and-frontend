@@ -29,9 +29,12 @@ jobs:
         with:
           filters: |
             api:
-            - 'api/**'
+              - 'api/**'
+              - '.github/**'
+
             frontend:
-            - 'frontend/**'
+              - 'frontend/**'
+              - '.github/**'
   test:
     needs: detect-changes
     if: needs.detect-changes.outputs.api == 'true'
