@@ -23,7 +23,7 @@ curl --fail --silent --show-error \
   --retry 30 \
   --retry-delay 2 \
   --retry-connrefused \
-  http://127.0.0.1:5000/health
+  http://127.0.0.1:5000
 
 echo "API health check passed."
 echo "API deployed successfully: $COMMIT"
