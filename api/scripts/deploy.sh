@@ -15,7 +15,7 @@ npx prisma migrate deploy
 
 pm2 reload ecosystem.config.cjs --update-env
 
-# TODO: need to implement api healt to be used here
+# TODO: need to implement api health endpoint to be used here
 # echo "Checking API health..."
 
 # curl --fail --silent --show-error \
