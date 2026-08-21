@@ -1,16 +1,19 @@
 #!/bin/bash
+
 set -e
 
+echo "HOME=$HOME"
+echo "NVM_DIR=$NVM_DIR"
+
 export NVM_DIR="$HOME/.nvm"
+
+echo "NVM_DIR=$NVM_DIR"
+
 source "$NVM_DIR/nvm.sh"
 
-cd /home/user-api/htdocs/api.jeitdev.com
+echo "PATH=$PATH"
+echo "npm=$(command -v npm)"
+echo "node=$(command -v node)"
+echo "pm2=$(command -v pm2)"
 
-git pull origin main
-
-cd api
-
-npm ci
-npx prisma migrate deploy
-
-pm2 reload ecosystem.config.cjs --update-env
+exit 0
