@@ -16,8 +16,8 @@ jobs:
     runs-on: ubuntu-latest
 
     outputs:
-      api: ${{ steps.filter.outputs.api }}
-      frontend: ${{ steps.filter.outputs.frontend }}
+      api: ${{ steps.filter.outputs.api || steps.manual.outputs.api }}
+      frontend: ${{ steps.filter.outputs.frontend || steps.manual.outputs.frontend }}
       commit: ${{ steps.commit.outputs.commit }}
 
     steps:
@@ -32,16 +32,25 @@ jobs:
 
       - name: Detect changes
         id: filter
+        if: github.event_name == 'push'
         uses: dorny/paths-filter@v3
         with:
           filters: |
             api:
-              - 'api/**'
-              - '.github/**'
+                - 'api/**'
+                - '.github/**'
 
             frontend:
-              - 'frontend/**'
-              - '.github/**'
+                - 'frontend/**'
+                - '.github/**'
+
+      - name: Mark both applications for manual deployment
+        id: manual
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          echo "api=true" >> "$GITHUB_OUTPUT"
+          echo "frontend=true" >> "$GITHUB_OUTPUT"
+
   test:
     needs: detect-changes
 
