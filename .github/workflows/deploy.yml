@@ -72,13 +72,32 @@ jobs:
         env:
           NEXT_PUBLIC_API_URL: http://localhost:5000
 
-  deploy:
-    needs:
-      - test
-      - build
-
+  deploy-api:
+    needs: test
     runs-on: ubuntu-latest
 
     steps:
-      - name: Deploy
-        run: echo "Deploying..."
+      - name: Deploy API
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: user-api
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          script: |
+            cd /home/user-api/htdocs/api.jeitdev.com
+            bash ./api/scripts/deploy.sh
+
+  deploy-frontend:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy frontend
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: user-frontend
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          script: |
+            cd /home/user-frontend/htdocs/app.jeitdev.com
+            bash ./frontend/scripts/deploy.sh
