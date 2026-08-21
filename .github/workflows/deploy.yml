@@ -85,6 +85,7 @@ jobs:
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           script: |
             cd /home/user-api/htdocs/api.jeitdev.com
+            git pull origin main
             bash ./api/scripts/deploy.sh
 
   deploy-frontend:
@@ -100,4 +101,5 @@ jobs:
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           script: |
             cd /home/user-frontend/htdocs/app.jeitdev.com
+            git pull origin main
             bash ./frontend/scripts/deploy.sh
