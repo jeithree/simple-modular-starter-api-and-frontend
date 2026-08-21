@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
     inputs:
       commit:
-        description: 'Commit to deploy'
+        description: 'Commit SHA to deploy (optional, defaults to the latest commit on main)'
         required: true
 
 jobs:
@@ -18,10 +18,17 @@ jobs:
     outputs:
       api: ${{ steps.filter.outputs.api }}
       frontend: ${{ steps.filter.outputs.frontend }}
+      commit: ${{ steps.commit.outputs.commit }}
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.commit || github.sha }}
+
+      - name: Get commit SHA
+        id: commit
+        run: echo "commit=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
       - name: Detect changes
         id: filter
@@ -37,7 +44,11 @@ jobs:
               - '.github/**'
   test:
     needs: detect-changes
-    if: needs.detect-changes.outputs.api == 'true'
+
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      needs.detect-changes.outputs.api == 'true'
+
     runs-on: ubuntu-latest
 
     services:
@@ -75,7 +86,11 @@ jobs:
 
   build:
     needs: detect-changes
-    if: needs.detect-changes.outputs.frontend == 'true'
+
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      needs.detect-changes.outputs.frontend == 'true'
+
     runs-on: ubuntu-latest
 
     steps:
@@ -103,7 +118,11 @@ jobs:
     needs:
       - detect-changes
       - test
-    if: needs.detect-changes.outputs.api == 'true'
+
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      needs.detect-changes.outputs.api == 'true'
+
     runs-on: ubuntu-latest
 
     steps:
@@ -115,14 +134,19 @@ jobs:
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           script: |
             cd /home/user-api/htdocs/api.jeitdev.com
-            git pull origin main
+            git fetch origin
+            git checkout ${{ needs.detect-changes.outputs.commit }}
             bash ./api/scripts/deploy.sh
 
   deploy-frontend:
     needs:
       - detect-changes
       - build
-    if: needs.detect-changes.outputs.frontend == 'true'
+
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      needs.detect-changes.outputs.frontend == 'true'
+
     runs-on: ubuntu-latest
 
     steps:
@@ -134,5 +158,6 @@ jobs:
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           script: |
             cd /home/user-frontend/htdocs/app.jeitdev.com
-            git pull origin main
+            git fetch origin
+            git checkout ${{ needs.detect-changes.outputs.commit }}
             bash ./frontend/scripts/deploy.sh
