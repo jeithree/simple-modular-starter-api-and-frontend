@@ -9,7 +9,7 @@ import {RedisStore} from 'connect-redis';
 import redisClient from '../redisClient.ts';
 import {
 	PORT,
-	API_URL,
+	SITE_URL,
 	SESSION_SECRET,
 	SESSION_KEY_PREFIX,
 	IS_DEV_MODE,
@@ -53,7 +53,7 @@ app.use(
 app.use(helmet());
 app.use(
 	cors({
-		origin: [API_URL],
+		origin: [SITE_URL],
 		credentials: true,
 	}),
 );
