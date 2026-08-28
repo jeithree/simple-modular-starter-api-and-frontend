@@ -1,11 +1,17 @@
 import type {ApiResponse, ApiError} from '@/types/api';
+import {API_URL} from '@/config';
+
+const createApiUrl = (endpoint: string) => {
+	if (/^https?:\/\//i.test(endpoint)) return endpoint;
+	return `${API_URL}/${endpoint.replace(/^\/+/, '')}`;
+};
 
 export async function apiFetch<T = unknown>(
 	endpoint: string,
 	options?: RequestInit
 ): Promise<ApiResponse<T>> {
 	try {
-		const response = await fetch(endpoint, {
+		const response = await fetch(createApiUrl(endpoint), {
 			...options,
 			headers: {
 				'Content-Type': 'application/json',
