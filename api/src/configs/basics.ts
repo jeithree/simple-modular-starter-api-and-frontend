@@ -4,9 +4,6 @@ if (!process.env.PORT) {
 if (!process.env.NODE_ENV) {
 	throw new Error('NODE_ENV is not defined in environment variables');
 }
-if (!process.env.API_URL) {
-	throw new Error('API_URL is not defined in environment variables');
-}
 if (!process.env.SITE_URL) {
 	throw new Error('SITE_URL is not defined in environment variables');
 }
@@ -17,9 +14,6 @@ if (!process.env.TIME_ZONE) {
 export const PORT = Number(process.env.PORT);
 export const IS_DEV_MODE = process.env.NODE_ENV === 'development';
 export const IS_TEST_MODE = process.env.NODE_ENV === 'test';
-export const API_URL = IS_DEV_MODE
-	? 'http://localhost:' + PORT
-	: process.env.API_URL;
 export const TIME_ZONE = process.env.TIME_ZONE;
 export const SITE_URL = process.env.SITE_URL;
 
