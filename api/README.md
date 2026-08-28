@@ -34,10 +34,10 @@ cp .env.example .env.local
 
 Configure the following environment variables:
 
-- `DATABASE_URL` - PostgreSQL connection string
-- `REDIS_URL` - Redis connection string (default: redis://localhost:6379)
+- `DATABASE_URL` - MySQL connection string
+- `REDIS_HOST` / `REDIS_PORT` - Redis connection settings
 - `SESSION_SECRET` - Secret for session encryption
-- `API_URL` - Frontend URL for CORS
+- `SITE_URL` - Frontend URL allowed by CORS (for example, `http://localhost:3000`)
 
 3. Start Redis (required for sessions):
 
