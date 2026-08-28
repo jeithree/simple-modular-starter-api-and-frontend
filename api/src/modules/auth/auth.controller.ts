@@ -56,6 +56,10 @@ export const login = async (
 			`${USER_SESSION_SET_PREFIX}${user.id}`,
 			req.session.id,
 		);
+		await redisClient.expire(
+			`${USER_SESSION_SET_PREFIX}${user.id}`,
+			Math.ceil(SESSION_COOKIE.maxAge / 1000),
+		);
 
 		return res.status(200).json(successResponse('Login successful', user));
 	} catch (error) {
@@ -69,10 +73,29 @@ export const logout = async (
 	next: NextFunction,
 ) => {
 	try {
-		req.session.destroy((err) => {
-			if (err) {
-				logger.error({err, method: 'logout'}, 'Error destroying session');
+		const userId = req.session.userId;
+		const sessionId = req.sessionID;
+
+		if (userId) {
+			try {
+				await redisClient.sRem(
+					`${USER_SESSION_SET_PREFIX}${userId}`,
+					sessionId,
+				);
+			} catch (err) {
+				logger.error({err, method: 'logout'}, 'Error removing tracked session');
 			}
+		}
+
+		await new Promise<void>((resolve, reject) => {
+			req.session.destroy((err) => {
+				if (err) {
+					reject(err);
+					return;
+				}
+
+				resolve();
+			});
 		});
 
 		res.clearCookie(SESSION_COOKIE.name, SESSION_COOKIE.options);
