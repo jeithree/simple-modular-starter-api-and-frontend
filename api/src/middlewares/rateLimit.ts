@@ -1,11 +1,13 @@
 import type {Request, Response, NextFunction} from 'express';
 import rateLimit from 'express-rate-limit';
+import createRateLimitStore from '../lib/rateLimitStore.ts';
 import {RateLimitError} from '../lib/appError.ts';
 import {IS_TEST_MODE} from '../configs/basics.ts';
 
 export const registerLimiter = rateLimit({
 	windowMs: 60 * 60 * 1000,
 	max: 10,
+    store: createRateLimitStore('rate-limit:register:'),
 	handler: (req: Request, _res: Response, next: NextFunction) => {
 		req.log.warn(
 			{
@@ -29,6 +31,7 @@ export const registerLimiter = rateLimit({
 export const loginLimiter = rateLimit({
 	windowMs: 15 * 60 * 1000,
 	max: IS_TEST_MODE ? 1000 : 10,
+    store: createRateLimitStore('rate-limit:login:'),
 	handler: (req: Request, _res: Response, next: NextFunction) => {
 		req.log.warn(
 			{
