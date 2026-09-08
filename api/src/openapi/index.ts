@@ -4,10 +4,12 @@ import {registry} from './registry.ts';
 import {registerAdminOpenApi} from '../modules/admin/admin.openapi.ts';
 import {registerAuthOpenApi} from '../modules/auth/auth.openapi.ts';
 import {registerUserOpenApi} from '../modules/user/user.openapi.ts';
+import {registerHealthOpenApi} from '../modules/health/health.openapi.ts';
 
 registerAdminOpenApi();
 registerAuthOpenApi();
 registerUserOpenApi();
+registerHealthOpenApi();
 
 export const buildOpenApiDocument = () => {
 	const generator = new OpenApiGeneratorV3(registry.definitions);
