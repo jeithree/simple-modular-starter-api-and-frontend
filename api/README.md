@@ -8,6 +8,7 @@ A minimalist Express + Prisma API starter with essential features only.
 - ✅ Prisma ORM
 - ✅ Redis session store
 - ✅ Basic authentication (register, login, logout)
+- ✅ Health check endpoint
 - ✅ Session management with express-session
 - ✅ Password hashing with bcrypt
 - ✅ Input validation with Zod
@@ -68,6 +69,10 @@ http://localhost:5000/docs/
 
 ## API Endpoints
 
+### Health
+
+- `GET /api/v1/health` - Check whether the API is healthy
+
 ### Auth
 
 - `POST /api/v1/auth/register` - Register a new user
@@ -104,6 +109,7 @@ src/
 ├── lib/                # AppError, apiResponse, memoryCache
 ├── middlewares/        # Auth, errorHandler, rateLimit, validation
 ├── modules/
+│   ├── health/         # API health check
 │   ├── auth/           # Register, login, logout, session
 │   ├── user/           # Profile, sessions
 │   └── admin/          # User management
