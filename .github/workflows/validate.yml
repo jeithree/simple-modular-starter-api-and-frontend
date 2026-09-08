@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
     inputs:
       commit:
-        description: 'Commit SHA to deploy (optional, defaults to the latest commit on main)'
+        description: 'Commit SHA to test and build'
         required: true
 
 jobs:
